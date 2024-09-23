@@ -17,6 +17,7 @@ class ExpenseApp(QWidget):
         self.add_button = QPushButton("Add Expense")
         self.delete_button = QPushButton("Delete Expense")
         self.add_button.clicked.connect(self.add_expense)
+        self.delete_button.clicked.connect(self.delete_expense)
         
         self.table = QTableWidget()
         self.table.setColumnCount(5) # ID, date, category, amount, description
@@ -109,6 +110,25 @@ class ExpenseApp(QWidget):
         self.dropdown.setCurrentIndex(0)
         self.amount.clear()
         self.description.clear()
+        
+        self.load_table()
+        
+    def delete_expense(self):
+        selected_row = self.table.currentRow()
+        if selected_row == -1:
+            QMessageBox.warning(self, "No Expense Chosen", "Please choose an expense to delete.")
+            return
+        
+        expense_id = int(self.table.item(selected_row,0).text())
+        
+        confirm = QMessageBox.question(self, "Are you sure?", "Delete expense?", QMessageBox.Yes | QMessageBox.No)
+        
+        if confirm == QMessageBox.No:
+            return
+        query = QSqlQuery()
+        query.prepare("DELETE FROM expenses WHERE id = ?")
+        query.addBindValue(expense_id)
+        query.exec_()
         
         self.load_table()
         
