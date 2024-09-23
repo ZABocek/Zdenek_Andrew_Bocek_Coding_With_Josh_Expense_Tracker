@@ -131,13 +131,13 @@ class ExpenseApp(QWidget):
         # Get the selected row's ID
         selected_id = int(self.table.item(selected_row, 0).text())
         
-        # Shift all the rows below the selected row
+        # Shift all the rows below and including the selected row
         shift_query = QSqlQuery()
         shift_query.prepare("UPDATE expenses SET id = id + 1 WHERE id > ?")
         shift_query.addBindValue(selected_id)
         shift_query.exec_()
 
-        # Insert new expense at the next available ID (which should be `selected_id + 1`)
+        # Insert new expense at the next ID
         date = self.date_box.date().toString("dd-MM-yyyy")
         category = self.dropdown.currentText()
         amount = self.amount.text()
@@ -186,15 +186,17 @@ class ExpenseApp(QWidget):
         
         self.load_table()
         
+# Initialize the database
 database = QSqlDatabase.addDatabase("QSQLITE")
 database.setDatabaseName("expense.db")
 if not database.open():
     QMessageBox.critical(None, "Error", "Could not open your database")
     sys.exit(1)
     
+# Adjust the table schema
 query = QSqlQuery()
 query.exec_("""CREATE TABLE IF NOT EXISTS expenses (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               id INTEGER PRIMARY KEY,
                date TEXT,
                category TEXT,
                amount REAL,
