@@ -15,8 +15,10 @@ class ExpenseApp(QWidget):
         self.description = QLineEdit()
         
         self.add_button = QPushButton("Add Expense")
+        self.insert_button = QPushButton("Insert Expense")
         self.delete_button = QPushButton("Delete Expense")
         self.add_button.clicked.connect(self.add_expense)
+        self.insert_button.clicked.connect(self.insert_expense)
         self.delete_button.clicked.connect(self.delete_expense)
         
         self.table = QTableWidget()
@@ -61,6 +63,7 @@ class ExpenseApp(QWidget):
         self.row2.addWidget(self.description)
         
         self.row3.addWidget(self.add_button)
+        self.row3.addWidget(self.insert_button)
         self.row3.addWidget(self.delete_button)
         
         self.master_layout.addLayout(self.row1)
@@ -76,7 +79,7 @@ class ExpenseApp(QWidget):
     def load_table(self):
         self.table.setRowCount(0)
         
-        query = QSqlQuery("SELECT * FROM expenses")
+        query = QSqlQuery("SELECT * FROM expenses ORDER BY id ASC")
         row = 0
         while query.next():
             expense_id = query.value(0)
@@ -118,6 +121,47 @@ class ExpenseApp(QWidget):
         self.description.clear()
         
         self.load_table()
+
+    def insert_expense(self):
+        selected_row = self.table.currentRow()
+        if selected_row == -1:
+            QMessageBox.warning(self, "No Row Selected", "Please select a row to insert the new expense after.")
+            return
+
+        # Shift the IDs of all rows below the selected row
+        query = QSqlQuery("SELECT id FROM expenses WHERE id >= (SELECT id FROM expenses ORDER BY id LIMIT 1 OFFSET ?)")
+        query.addBindValue(selected_row)
+        while query.next():
+            current_id = query.value(0)
+            update_query = QSqlQuery()
+            update_query.prepare("UPDATE expenses SET id = id + 1 WHERE id = ?")
+            update_query.addBindValue(current_id)
+            update_query.exec_()
+        
+        # Insert the new expense with the ID adjusted to the correct position
+        date = self.date_box.date().toString("dd-MM-yyyy")
+        category = self.dropdown.currentText()
+        amount = self.amount.text()
+        description = self.description.text()
+        
+        insert_query = QSqlQuery()
+        insert_query.prepare("""
+                             INSERT INTO expenses (id, date, category, amount, description)
+                             VALUES (?, ?, ?, ?, ?)
+                             """)
+        insert_query.addBindValue(selected_row + 1)
+        insert_query.addBindValue(date)
+        insert_query.addBindValue(category)
+        insert_query.addBindValue(amount)
+        insert_query.addBindValue(description)
+        insert_query.exec_()
+
+        self.date_box.setDate(QDate.currentDate())
+        self.dropdown.setCurrentIndex(0)
+        self.amount.clear()
+        self.description.clear()
+        
+        self.load_table()
         
     def delete_expense(self):
         selected_row = self.table.currentRow()
@@ -136,6 +180,11 @@ class ExpenseApp(QWidget):
         query.addBindValue(expense_id)
         query.exec_()
         
+        # Reorder the remaining IDs after deletion
+        reorder_query = QSqlQuery("UPDATE expenses SET id = id - 1 WHERE id > ?")
+        reorder_query.addBindValue(expense_id)
+        reorder_query.exec_()
+        
         self.load_table()
         
 database = QSqlDatabase.addDatabase("QSQLITE")
@@ -145,17 +194,14 @@ if not database.open():
     sys.exit(1)
     
 query = QSqlQuery()
-query.exec_("""
-           CREATE TABLE IF NOT EXISTS expenses (
+query.exec_("""CREATE TABLE IF NOT EXISTS expenses (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                date TEXT,
                category TEXT,
                amount REAL,
-               description TEXT
-           )
-            """)
+               description TEXT)""")
         
-if __name__ in "__main__":
+if __name__ == "__main__":
     app = QApplication([])
     main = ExpenseApp()
     main.show()
