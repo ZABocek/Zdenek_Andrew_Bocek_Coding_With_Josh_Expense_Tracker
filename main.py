@@ -137,7 +137,7 @@ class ExpenseApp(QWidget):
         shift_query.addBindValue(selected_id)
         shift_query.exec_()
 
-        # Insert new expense at the next available ID
+        # Insert new expense at the next available ID (which should be `selected_id + 1`)
         date = self.date_box.date().toString("dd-MM-yyyy")
         category = self.dropdown.currentText()
         amount = self.amount.text()
