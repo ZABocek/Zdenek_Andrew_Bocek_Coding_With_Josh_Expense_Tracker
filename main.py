@@ -127,18 +127,17 @@ class ExpenseApp(QWidget):
         if selected_row == -1:
             QMessageBox.warning(self, "No Row Selected", "Please select a row to insert the new expense after.")
             return
-
-        # Shift the IDs of all rows below the selected row
-        query = QSqlQuery("SELECT id FROM expenses WHERE id >= (SELECT id FROM expenses ORDER BY id LIMIT 1 OFFSET ?)")
-        query.addBindValue(selected_row)
-        while query.next():
-            current_id = query.value(0)
-            update_query = QSqlQuery()
-            update_query.prepare("UPDATE expenses SET id = id + 1 WHERE id = ?")
-            update_query.addBindValue(current_id)
-            update_query.exec_()
         
-        # Insert the new expense with the ID adjusted to the correct position
+        # Get the selected row's ID
+        selected_id = int(self.table.item(selected_row, 0).text())
+        
+        # Shift all the rows below the selected row
+        shift_query = QSqlQuery()
+        shift_query.prepare("UPDATE expenses SET id = id + 1 WHERE id > ?")
+        shift_query.addBindValue(selected_id)
+        shift_query.exec_()
+
+        # Insert new expense at the next available ID
         date = self.date_box.date().toString("dd-MM-yyyy")
         category = self.dropdown.currentText()
         amount = self.amount.text()
@@ -149,7 +148,7 @@ class ExpenseApp(QWidget):
                              INSERT INTO expenses (id, date, category, amount, description)
                              VALUES (?, ?, ?, ?, ?)
                              """)
-        insert_query.addBindValue(selected_row + 1)
+        insert_query.addBindValue(selected_id + 1)
         insert_query.addBindValue(date)
         insert_query.addBindValue(category)
         insert_query.addBindValue(amount)
