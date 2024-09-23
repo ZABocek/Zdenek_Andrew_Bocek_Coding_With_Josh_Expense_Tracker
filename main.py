@@ -23,24 +23,28 @@ class ExpenseApp(QWidget):
         self.table.setColumnCount(5) # ID, date, category, amount, description
         self.table.setHorizontalHeaderLabels(["Id", "Date", "Category", "Amount", "Description"])
         
-        self.dropdown.addItems(["Rent", "Utilities", "House Payment", "Internet", "Savings (Acorn)", "Savings Account", "Medicaid", 
-                                "GoodRX", "Medication Payment", "Medicare (Part B)", "Medicare (Part A)", 
-                                "American Health Insurance", "Czech Health Insurance", "German Health Insurance", 
-                                "Slovak Health Insurance", "American Dental Insurance", "Czech Dental Insurance", 
-                                "German Dental Insurance", "Slovak Dental Insurance", "Teeth Cleaning", "Night Guard", 
-                                "Dental Work", "Uber Ride", "Bus Ride", "Tram Ride", "Subway Ride", "Train Ride", "Train (Snack)", 
-                                "Train (Drink)", "Taxi Ride", "Plane Ticket", "Plane (Select Seating)", "Plane (Upgrade Seat)", 
-                                "Plane (Baggage Payment)", "Plane (Internet Payment)", "Plane (Buy Alcohol)", "Plane (Buy Snack)", 
-                                "Food Delivery", "Takeout", "Dining Out", "Food", "Dessert", "Drinks", "Alcohol", "Marijuana", 
-                                "Clothing", "Shoes", "Furniture", "Mattress", "Painting", "Kitchen Appliance", "Computer", 
-                                "Printer", "Electronics", "TV Payment", "Dishware/Tableware", "Cutlery", 
-                                "Household Cleaning Supplies","Miscellaneous Apartment Items", "Google One", "New York Times", 
-                                "Der Spiegel", "Amazon Prime", "Amazon (Purchase Video)", "Amazon Kindle (Purchase Book)", 
-                                "YouTube Music Premium", "DVD", "CD", "Crunchyroll Subscription", "Crunchyroll Merchandise", 
-                                "Czech Phone Payment", "German Phone Payment", "Google Phone Payment", "Netflix", "Disney+", 
-                                "ChatGPT", "App Deploying Service", "Payment for AI", "Disney+ Package", "Hulu", "ESPN", 
-                                "Adobe Scan", "Duolingo", "Tinder", "New York Times Cooking", "Adobe Acrobat Reader: Edit PDF"])
-        
+        self.dropdown.addItems(sorted(["Rent", "Utilities", "House Payment", "Internet", "Savings (Acorn)", "Savings Account", 
+                                       "Medicaid", "GoodRX", "Medication Payment", "Medicare (Part B)", "Medicare (Part A)", 
+                                       "American Health Insurance", "Czech Health Insurance", "German Health Insurance", 
+                                       "Slovak Health Insurance", "American Dental Insurance", "Czech Dental Insurance", 
+                                       "German Dental Insurance", "Slovak Dental Insurance", "Teeth Cleaning", "Night Guard", 
+                                       "Dental Work", "Uber Ride", "Bus Ride", "Tram Ride", "Subway Ride", "Train Ride", 
+                                       "Train (Snack)", "Train (Drink)", "Taxi Ride", "Plane Ticket", 
+                                       "Plane (Select Seating)", "Plane (Upgrade Seat)", "Plane (Baggage Payment)", 
+                                       "Plane (Internet Payment)", "Plane (Buy Alcohol)", "Plane (Buy Snack)", 
+                                       "Food Delivery", "Takeout", "Dining Out", "Food", "Dessert", "Drinks", "Alcohol", 
+                                       "Marijuana", "Clothing", "Shoes", "Regular Book Purchase", 
+                                       "Regular Newspaper Purchase", "Furniture", "Mattress", "Painting", "Kitchen Appliance", 
+                                       "Computer", "Printer", "Electronics", "TV Payment", "Dishware/Tableware", "Cutlery", 
+                                       "Household Cleaning Supplies", "Miscellaneous Apartment Items", "Google One", 
+                                       "New York Times", "Der Spiegel", "Amazon Prime", "Amazon (Purchase Video)", 
+                                       "Amazon Kindle (Purchase Book)", "Amazon Kindle (Audio Book)", "YouTube Music Premium", 
+                                       "DVD", "CD", "Crunchyroll Subscription", "Crunchyroll Merchandise", 
+                                       "Czech Phone Payment", "German Phone Payment", "Google Phone Payment", "Netflix", 
+                                       "Disney+", "ChatGPT", "App Deploying Service", "Payment for AI", "Disney+ Package", 
+                                       "Hulu", "ESPN", "Adobe Scan", "Duolingo", "Tinder", "New York Times Cooking", 
+                                       "Adobe Acrobat Reader: Edit PDF"]))
+
         self.master_layout = QVBoxLayout()
         self.row1 = QHBoxLayout()
         self.row2 = QHBoxLayout()
