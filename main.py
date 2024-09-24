@@ -347,6 +347,10 @@ class ExpenseApp(QWidget):
         max_id = 0
         if query.next() and query.value(0) is not None:
             max_id = query.value(0)
+            if isinstance(max_id, str):
+                max_id = int(max_id)
+        else:
+            max_id = 0
 
         new_id = max_id + 1
 
