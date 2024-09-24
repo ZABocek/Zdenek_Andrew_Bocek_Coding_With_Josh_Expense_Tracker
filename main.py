@@ -21,18 +21,18 @@ class ExpenseApp(QWidget):
         # Determine the operating system
         system_platform = platform.system()
 
-        # Set Comic Sans font for labels and dropdown
-        comic_font = QFont("Comic Sans MS", 10)
-
-        # Set cursive font for table contents
+        # Set professional font for labels and inputs
         if system_platform == 'Windows':
-            self.cursive_font_name = "Segoe Script"
+            professional_font_name = "Segoe UI"
         elif system_platform == 'Darwin':  # Mac OS
-            self.cursive_font_name = "Apple Chancery"
+            professional_font_name = "Helvetica Neue"
         else:
-            self.cursive_font_name = "Comic Sans MS"  # As a fallback
+            professional_font_name = "Arial"  # As a fallback for Linux or others
 
-        self.cursive_font = QFont(self.cursive_font_name, 10)
+        professional_font = QFont(professional_font_name, 10)
+
+        # Set font for table contents
+        self.table_font = QFont(professional_font_name, 10)
 
         # Currency data with symbols and formatting
         self.currency_data = {
@@ -66,26 +66,26 @@ class ExpenseApp(QWidget):
         self.description = QLineEdit()
         self.currency_dropdown = QComboBox()
 
-        # Apply Comic Sans font to labels and inputs
+        # Apply professional font to labels and inputs
         self.date_label = QLabel("Date:")
-        self.date_label.setFont(comic_font)
-        self.date_box.setFont(comic_font)
+        self.date_label.setFont(professional_font)
+        self.date_box.setFont(professional_font)
 
         self.category_label = QLabel("Category:")
-        self.category_label.setFont(comic_font)
-        self.dropdown.setFont(comic_font)
+        self.category_label.setFont(professional_font)
+        self.dropdown.setFont(professional_font)
 
         self.amount_label = QLabel("Amount:")
-        self.amount_label.setFont(comic_font)
-        self.amount.setFont(comic_font)
+        self.amount_label.setFont(professional_font)
+        self.amount.setFont(professional_font)
 
         self.currency_label = QLabel("Currency:")
-        self.currency_label.setFont(comic_font)
-        self.currency_dropdown.setFont(comic_font)
+        self.currency_label.setFont(professional_font)
+        self.currency_dropdown.setFont(professional_font)
 
         self.description_label = QLabel("Description:")
-        self.description_label.setFont(comic_font)
-        self.description.setFont(comic_font)
+        self.description_label.setFont(professional_font)
+        self.description.setFont(professional_font)
 
         self.add_button = QPushButton("Add Expense")
         self.insert_button = QPushButton("Insert Expense")
@@ -94,10 +94,10 @@ class ExpenseApp(QWidget):
         self.insert_button.clicked.connect(self.insert_expense)
         self.delete_button.clicked.connect(self.delete_expense)
 
-        # Apply Comic Sans to buttons
-        self.add_button.setFont(comic_font)
-        self.insert_button.setFont(comic_font)
-        self.delete_button.setFont(comic_font)
+        # Apply professional font to buttons
+        self.add_button.setFont(professional_font)
+        self.insert_button.setFont(professional_font)
+        self.delete_button.setFont(professional_font)
 
         # Populate currency dropdown with currencies
         self.currency_dropdown.addItems(sorted(self.currency_data.keys()))
@@ -111,7 +111,7 @@ class ExpenseApp(QWidget):
         self.table = QTableWidget()
         self.table.setColumnCount(6)  # ID, date, category, amount, currency, description
         self.table.setHorizontalHeaderLabels(["Id", "Date", "Category", "Amount", "Currency", "Description"])
-        self.table.setFont(self.cursive_font)  # Set cursive font for table
+        self.table.setFont(self.table_font)  # Set professional font for table
 
         self.dropdown.addItems(sorted([
             "Rent", "Utilities", "House Payment", "Internet", "Savings (Acorn)", "Savings Account",
@@ -297,7 +297,7 @@ class ExpenseApp(QWidget):
             amount_str = amount_str.replace(',', 'TEMP').replace('.', decimal_sep).replace('TEMP', thousand_sep)
             formatted_amount = f"{symbol}{amount_str}"
 
-            # Create table items with cursive font
+            # Create table items with professional font
             item_id = QTableWidgetItem(str(expense_id))
             item_date = QTableWidgetItem(date)
             item_category = QTableWidgetItem(category)
@@ -305,13 +305,13 @@ class ExpenseApp(QWidget):
             item_currency = QTableWidgetItem(currency)
             item_description = QTableWidgetItem(description)
 
-            # Set cursive font to table items using self.cursive_font
-            item_id.setFont(self.cursive_font)
-            item_date.setFont(self.cursive_font)
-            item_category.setFont(self.cursive_font)
-            item_amount.setFont(self.cursive_font)
-            item_currency.setFont(self.cursive_font)
-            item_description.setFont(self.cursive_font)
+            # Set professional font to table items using self.table_font
+            item_id.setFont(self.table_font)
+            item_date.setFont(self.table_font)
+            item_category.setFont(self.table_font)
+            item_amount.setFont(self.table_font)
+            item_currency.setFont(self.table_font)
+            item_description.setFont(self.table_font)
 
             self.table.setItem(row, 0, item_id)
             self.table.setItem(row, 1, item_date)
