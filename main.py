@@ -12,7 +12,7 @@ import platform
 class ExpenseApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.resize(600, 550)
+        self.resize(600, 600)
         self.setWindowTitle("Expense Tracker 2.0")
 
         # Set background color
@@ -34,10 +34,26 @@ class ExpenseApp(QWidget):
 
         self.cursive_font = QFont(self.cursive_font_name, 10)
 
+        # Currency data with symbols and formatting
+        self.currency_data = {
+            'USD': {'symbol': '$', 'decimal_sep': '.', 'thousand_sep': ','},
+            'EUR': {'symbol': '€', 'decimal_sep': ',', 'thousand_sep': '.'},
+            'GBP': {'symbol': '£', 'decimal_sep': '.', 'thousand_sep': ','},
+            'JPY': {'symbol': '¥', 'decimal_sep': '.', 'thousand_sep': ','},
+            'AUD': {'symbol': '$', 'decimal_sep': '.', 'thousand_sep': ','},
+            'CAD': {'symbol': '$', 'decimal_sep': '.', 'thousand_sep': ','},
+            'CHF': {'symbol': 'CHF', 'decimal_sep': '.', 'thousand_sep': '\''},
+            'CNY': {'symbol': '¥', 'decimal_sep': '.', 'thousand_sep': ','},
+            'SEK': {'symbol': 'kr', 'decimal_sep': ',', 'thousand_sep': ' '},
+            'NZD': {'symbol': '$', 'decimal_sep': '.', 'thousand_sep': ','},
+            # Add more currencies as needed
+        }
+
         self.date_box = QDateEdit()
         self.dropdown = QComboBox()
         self.amount = QLineEdit()
         self.description = QLineEdit()
+        self.currency_dropdown = QComboBox()
 
         # Apply Comic Sans font to labels and inputs
         self.date_label = QLabel("Date:")
@@ -51,6 +67,10 @@ class ExpenseApp(QWidget):
         self.amount_label = QLabel("Amount:")
         self.amount_label.setFont(comic_font)
         self.amount.setFont(comic_font)
+
+        self.currency_label = QLabel("Currency:")
+        self.currency_label.setFont(comic_font)
+        self.currency_dropdown.setFont(comic_font)
 
         self.description_label = QLabel("Description:")
         self.description_label.setFont(comic_font)
@@ -68,16 +88,18 @@ class ExpenseApp(QWidget):
         self.insert_button.setFont(comic_font)
         self.delete_button.setFont(comic_font)
 
-        self.amount.textChanged.connect(self.format_amount)  # Connect the signal to the custom slot
+        # Populate currency dropdown with top currencies
+        self.currency_dropdown.addItems(self.currency_data.keys())
 
-        # Apply a validator to the amount field to prevent invalid characters
-        reg_ex = QRegularExpression(r'^-?[0-9,]*\.?[0-9]*$')
-        validator = QRegularExpressionValidator(reg_ex, self.amount)
-        self.amount.setValidator(validator)
+        self.amount.textChanged.connect(self.format_amount)
+        self.currency_dropdown.currentIndexChanged.connect(self.update_currency_formatting)
+
+        # Placeholder for the validator, will be set in update_currency_formatting
+        self.validator = None
 
         self.table = QTableWidget()
-        self.table.setColumnCount(5)  # ID, date, category, amount, description
-        self.table.setHorizontalHeaderLabels(["Id", "Date", "Category", "Amount", "Description"])
+        self.table.setColumnCount(6)  # ID, date, category, amount, currency, description
+        self.table.setHorizontalHeaderLabels(["Id", "Date", "Category", "Amount", "Currency", "Description"])
         self.table.setFont(self.cursive_font)  # Set cursive font for table
 
         self.dropdown.addItems(sorted([
@@ -104,9 +126,11 @@ class ExpenseApp(QWidget):
             "Adobe Acrobat Reader: Edit PDF"
         ]))
 
+        # Layouts
         self.master_layout = QVBoxLayout()
         self.row1 = QHBoxLayout()
-        self.row2 = QHBoxLayout()
+        self.row2a = QHBoxLayout()
+        self.row2b = QHBoxLayout()
         self.row3 = QHBoxLayout()
 
         self.row1.addWidget(self.date_label)
@@ -114,78 +138,113 @@ class ExpenseApp(QWidget):
         self.row1.addWidget(self.category_label)
         self.row1.addWidget(self.dropdown)
 
-        self.row2.addWidget(self.amount_label)
-        self.row2.addWidget(self.amount)
-        self.row2.addWidget(self.description_label)
-        self.row2.addWidget(self.description)
+        self.row2a.addWidget(self.amount_label)
+        self.row2a.addWidget(self.amount)
+        self.row2a.addWidget(self.currency_label)
+        self.row2a.addWidget(self.currency_dropdown)
+
+        self.row2b.addWidget(self.description_label)
+        self.row2b.addWidget(self.description)
 
         self.row3.addWidget(self.add_button)
         self.row3.addWidget(self.insert_button)
         self.row3.addWidget(self.delete_button)
 
         self.master_layout.addLayout(self.row1)
-        self.master_layout.addLayout(self.row2)
+        self.master_layout.addLayout(self.row2a)
+        self.master_layout.addLayout(self.row2b)
         self.master_layout.addLayout(self.row3)
         self.master_layout.addWidget(self.table)
 
         self.setLayout(self.master_layout)
 
+        # Initialize currency formatting
+        self.update_currency_formatting()
+
         self.load_table()
 
+    def update_currency_formatting(self):
+        currency = self.currency_dropdown.currentText()
+        decimal_sep = self.currency_data[currency]['decimal_sep']
+        thousand_sep = self.currency_data[currency]['thousand_sep']
+
+        # Update the regular expression validator
+        escaped_decimal_sep = re.escape(decimal_sep)
+        escaped_thousand_sep = re.escape(thousand_sep)
+
+        reg_ex_pattern = f"^-?[0-9{escaped_thousand_sep}]*{escaped_decimal_sep}?[0-9]*$"
+
+        reg_ex = QRegularExpression(reg_ex_pattern)
+        validator = QRegularExpressionValidator(reg_ex, self.amount)
+        self.amount.setValidator(validator)
+
+        # Update the amount field to reformat existing text if any
+        self.format_amount()
+
     def format_amount(self):
-        """Format the amount with commas as user types."""
+        """Format the amount with commas/periods as user types, according to currency."""
         cursor_pos = self.amount.cursorPosition()
         text = self.amount.text()
-        # Remove commas to work with the raw number
-        text_without_commas = text.replace(",", "")
-        # Keep track of the position of the cursor in the text without commas
-        cursor_pos_without_commas = cursor_pos - text[:cursor_pos].count(',')
 
-        if text_without_commas:
-            # Ensure that the input is numeric
+        currency = self.currency_dropdown.currentText()
+        decimal_sep = self.currency_data[currency]['decimal_sep']
+        thousand_sep = self.currency_data[currency]['thousand_sep']
+
+        # Remove thousand separators to work with the raw number
+        text_without_thousand_sep = text.replace(thousand_sep, '')
+        # Keep track of the position of the cursor in the text without thousand separators
+        cursor_pos_without_thousand_sep = cursor_pos - text[:cursor_pos].count(thousand_sep)
+
+        if text_without_thousand_sep:
             try:
                 # Check for negative sign
                 negative = False
-                if text_without_commas.startswith('-'):
+                if text_without_thousand_sep.startswith('-'):
                     negative = True
-                    text_without_commas = text_without_commas[1:]
-                    cursor_pos_without_commas -= 1
+                    text_without_thousand_sep = text_without_thousand_sep[1:]
+                    cursor_pos_without_thousand_sep -= 1
 
                 # Separate integer and decimal parts
-                if '.' in text_without_commas:
-                    integer_part, decimal_part = text_without_commas.split('.', 1)  # Use maxsplit=1
+                if decimal_sep in text_without_thousand_sep:
+                    integer_part, decimal_part = text_without_thousand_sep.split(decimal_sep, 1)
                 else:
-                    integer_part = text_without_commas
+                    integer_part = text_without_thousand_sep
                     decimal_part = ''
 
-                # Format the integer part with commas
+                # Remove any non-digit characters
+                integer_part = re.sub(r'\D', '', integer_part)
+                decimal_part = re.sub(r'\D', '', decimal_part)
+
+                # Format the integer part with thousand separators
                 if integer_part:
-                    integer_part_with_commas = "{:,}".format(int(integer_part))
+                    reversed_integer = integer_part[::-1]
+                    grouped = [reversed_integer[i:i+3] for i in range(0, len(reversed_integer), 3)]
+                    integer_part_with_thousand_sep = thousand_sep.join(grouped)[::-1]
                 else:
-                    integer_part_with_commas = ''
+                    integer_part_with_thousand_sep = ''
 
                 # Reconstruct the formatted text
                 if decimal_part != '':
-                    formatted_text = integer_part_with_commas + '.' + decimal_part
+                    formatted_text = integer_part_with_thousand_sep + decimal_sep + decimal_part
                 else:
-                    # Check if user typed a decimal point at the end
-                    if '.' in text_without_commas and text_without_commas.endswith('.'):
-                        formatted_text = integer_part_with_commas + '.'
+                    # Check if user typed a decimal separator at the end
+                    if decimal_sep in text_without_thousand_sep and text_without_thousand_sep.endswith(decimal_sep):
+                        formatted_text = integer_part_with_thousand_sep + decimal_sep
                     else:
-                        formatted_text = integer_part_with_commas
+                        formatted_text = integer_part_with_thousand_sep
 
                 if negative:
                     formatted_text = '-' + formatted_text
-                    cursor_pos_without_commas += 1
+                    cursor_pos_without_thousand_sep += 1
 
                 # Update the cursor position based on the new formatted text
                 new_cursor_pos = 0
-                idx_without_commas = 0
-                for idx_with_commas, char in enumerate(formatted_text):
-                    if idx_without_commas >= cursor_pos_without_commas:
+                idx_without_thousand_sep = 0
+                for idx_with_thousand_sep, char in enumerate(formatted_text):
+                    if idx_without_thousand_sep >= cursor_pos_without_thousand_sep:
                         break
-                    if char != ',':
-                        idx_without_commas += 1
+                    if char != thousand_sep:
+                        idx_without_thousand_sep += 1
                     new_cursor_pos += 1
 
                 self.amount.blockSignals(True)
@@ -210,18 +269,29 @@ class ExpenseApp(QWidget):
             date = query.value(1)
             category = query.value(2)
             amount = query.value(3)
-            description = query.value(4)
+            currency = query.value(4)
+            description = query.value(5)
 
             self.table.insertRow(row)
 
-            # Format the amount with commas when displaying in the table
-            formatted_amount = "{:,.2f}".format(amount)
+            # Get the currency data
+            currency_data = self.currency_data.get(currency, {'symbol': '', 'decimal_sep': '.', 'thousand_sep': ','})
+            symbol = currency_data['symbol']
+            decimal_sep = currency_data['decimal_sep']
+            thousand_sep = currency_data['thousand_sep']
+
+            # Format the amount
+            amount_str = "{:,.2f}".format(amount)
+            # Replace the decimal point and thousand separator as per currency
+            amount_str = amount_str.replace(',', 'TEMP').replace('.', decimal_sep).replace('TEMP', thousand_sep)
+            formatted_amount = f"{symbol}{amount_str}"
 
             # Create table items with cursive font
             item_id = QTableWidgetItem(str(expense_id))
             item_date = QTableWidgetItem(date)
             item_category = QTableWidgetItem(category)
             item_amount = QTableWidgetItem(formatted_amount)
+            item_currency = QTableWidgetItem(currency)
             item_description = QTableWidgetItem(description)
 
             # Set cursive font to table items using self.cursive_font
@@ -229,21 +299,31 @@ class ExpenseApp(QWidget):
             item_date.setFont(self.cursive_font)
             item_category.setFont(self.cursive_font)
             item_amount.setFont(self.cursive_font)
+            item_currency.setFont(self.cursive_font)
             item_description.setFont(self.cursive_font)
 
             self.table.setItem(row, 0, item_id)
             self.table.setItem(row, 1, item_date)
             self.table.setItem(row, 2, item_category)
             self.table.setItem(row, 3, item_amount)
-            self.table.setItem(row, 4, item_description)
+            self.table.setItem(row, 4, item_currency)
+            self.table.setItem(row, 5, item_description)
 
             row += 1
 
     def add_expense(self):
         date = self.date_box.date().toString("dd-MM-yyyy")
         category = self.dropdown.currentText()
-        amount_text = self.amount.text().replace(",", "")  # Remove commas before storing the value
+        amount_text = self.amount.text()
         description = self.description.text()
+        currency = self.currency_dropdown.currentText()
+        decimal_sep = self.currency_data[currency]['decimal_sep']
+        thousand_sep = self.currency_data[currency]['thousand_sep']
+
+        # Remove thousand separators
+        amount_text = amount_text.replace(thousand_sep, '')
+        # Replace decimal separator with '.'
+        amount_text = amount_text.replace(decimal_sep, '.')
 
         try:
             amount = float(amount_text)
@@ -253,17 +333,19 @@ class ExpenseApp(QWidget):
 
         query = QSqlQuery()
         query.prepare("""
-                      INSERT INTO expenses (date, category, amount, description)
-                      VALUES (?, ?, ?, ?)
+                      INSERT INTO expenses (date, category, amount, currency, description)
+                      VALUES (?, ?, ?, ?, ?)
                       """)
         query.addBindValue(date)
         query.addBindValue(category)
         query.addBindValue(amount)
+        query.addBindValue(currency)
         query.addBindValue(description)
         query.exec_()
 
         self.date_box.setDate(QDate.currentDate())
         self.dropdown.setCurrentIndex(0)
+        self.currency_dropdown.setCurrentIndex(0)
         self.amount.clear()
         self.description.clear()
 
@@ -287,8 +369,16 @@ class ExpenseApp(QWidget):
         # Insert new expense at the next ID
         date = self.date_box.date().toString("dd-MM-yyyy")
         category = self.dropdown.currentText()
-        amount_text = self.amount.text().replace(",", "")  # Remove commas before storing the value
+        amount_text = self.amount.text()
         description = self.description.text()
+        currency = self.currency_dropdown.currentText()
+        decimal_sep = self.currency_data[currency]['decimal_sep']
+        thousand_sep = self.currency_data[currency]['thousand_sep']
+
+        # Remove thousand separators
+        amount_text = amount_text.replace(thousand_sep, '')
+        # Replace decimal separator with '.'
+        amount_text = amount_text.replace(decimal_sep, '.')
 
         try:
             amount = float(amount_text)
@@ -298,18 +388,20 @@ class ExpenseApp(QWidget):
 
         insert_query = QSqlQuery()
         insert_query.prepare("""
-                             INSERT INTO expenses (id, date, category, amount, description)
-                             VALUES (?, ?, ?, ?, ?)
+                             INSERT INTO expenses (id, date, category, amount, currency, description)
+                             VALUES (?, ?, ?, ?, ?, ?)
                              """)
         insert_query.addBindValue(selected_id + 1)
         insert_query.addBindValue(date)
         insert_query.addBindValue(category)
         insert_query.addBindValue(amount)
+        insert_query.addBindValue(currency)
         insert_query.addBindValue(description)
         insert_query.exec_()
 
         self.date_box.setDate(QDate.currentDate())
         self.dropdown.setCurrentIndex(0)
+        self.currency_dropdown.setCurrentIndex(0)
         self.amount.clear()
         self.description.clear()
 
@@ -356,6 +448,7 @@ query.exec_("""
         date TEXT,
         category TEXT,
         amount REAL,
+        currency TEXT,
         description TEXT
     )
 """)
