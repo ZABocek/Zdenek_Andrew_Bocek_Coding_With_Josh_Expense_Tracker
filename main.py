@@ -81,15 +81,67 @@ class ExpenseApp(QWidget):
 
     def format_amount(self):
         """Format the amount with commas as user types."""
-        text = self.amount.text().replace(",", "")  # Remove commas to work with the raw number
-        if text:  # If there's any input
+        cursor_pos = self.amount.cursorPosition()
+        text = self.amount.text()
+        # Remove commas to work with the raw number
+        text_without_commas = text.replace(",", "")
+        # Keep track of the position of the cursor in the text without commas
+        cursor_pos_without_commas = cursor_pos - text[:cursor_pos].count(',')
+
+        if text_without_commas:
+            # Ensure that the input is numeric
             try:
-                formatted_text = "{:,.2f}".format(float(text))
-                self.amount.blockSignals(True)  # Temporarily block signals to avoid recursion
+                # Check for negative sign
+                negative = False
+                if text_without_commas.startswith('-'):
+                    negative = True
+                    text_without_commas = text_without_commas[1:]
+                    cursor_pos_without_commas -= 1
+
+                # Separate integer and decimal parts
+                if '.' in text_without_commas:
+                    integer_part, decimal_part = text_without_commas.split('.')
+                else:
+                    integer_part = text_without_commas
+                    decimal_part = ''
+
+                # Format the integer part with commas
+                if integer_part:
+                    integer_part_with_commas = "{:,}".format(int(integer_part))
+                else:
+                    integer_part_with_commas = ''
+
+                # Reconstruct the formatted text
+                if decimal_part:
+                    formatted_text = integer_part_with_commas + '.' + decimal_part
+                else:
+                    formatted_text = integer_part_with_commas
+
+                if negative:
+                    formatted_text = '-' + formatted_text
+                    cursor_pos_without_commas += 1
+
+                # Update the cursor position based on the new formatted text
+                new_cursor_pos = 0
+                idx_without_commas = 0
+                for idx_with_commas, char in enumerate(formatted_text):
+                    if idx_without_commas >= cursor_pos_without_commas:
+                        break
+                    if char != ',':
+                        idx_without_commas += 1
+                    new_cursor_pos += 1
+
+                self.amount.blockSignals(True)
                 self.amount.setText(formatted_text)
-                self.amount.blockSignals(False)  # Unblock signals after setting formatted text
+                self.amount.setCursorPosition(new_cursor_pos)
+                self.amount.blockSignals(False)
             except ValueError:
-                pass  # Ignore errors for non-numeric input
+                # If input is not a valid integer, do not format
+                pass
+        else:
+            self.amount.blockSignals(True)
+            self.amount.clear()
+            self.amount.blockSignals(False)
 
     def load_table(self):
         self.table.setRowCount(0)
@@ -116,8 +168,14 @@ class ExpenseApp(QWidget):
     def add_expense(self):
         date = self.date_box.date().toString("dd-MM-yyyy")
         category = self.dropdown.currentText()
-        amount = self.amount.text().replace(",", "")  # Remove commas before storing the value
+        amount_text = self.amount.text().replace(",", "")  # Remove commas before storing the value
         description = self.description.text()
+
+        try:
+            amount = float(amount_text)
+        except ValueError:
+            QMessageBox.warning(self, "Invalid Input", "Please enter a valid amount.")
+            return
         
         query = QSqlQuery()
         query.prepare("""
@@ -155,8 +213,14 @@ class ExpenseApp(QWidget):
         # Insert new expense at the next ID
         date = self.date_box.date().toString("dd-MM-yyyy")
         category = self.dropdown.currentText()
-        amount = self.amount.text().replace(",", "")  # Remove commas before storing the value
+        amount_text = self.amount.text().replace(",", "")  # Remove commas before storing the value
         description = self.description.text()
+
+        try:
+            amount = float(amount_text)
+        except ValueError:
+            QMessageBox.warning(self, "Invalid Input", "Please enter a valid amount.")
+            return
         
         insert_query = QSqlQuery()
         insert_query.prepare("""
