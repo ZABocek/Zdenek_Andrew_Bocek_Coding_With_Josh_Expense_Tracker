@@ -342,18 +342,27 @@ class ExpenseApp(QWidget):
             QMessageBox.warning(self, "Invalid Input", "Please enter a valid amount.")
             return
 
-        query = QSqlQuery()
-        query.prepare("""
-                      INSERT INTO expenses (date, category, amount, currency, description)
-                      VALUES (?, ?, ?, ?, ?)
-                      """)
-        query.addBindValue(date)
-        query.addBindValue(category)
-        query.addBindValue(amount)
-        query.addBindValue(currency)
-        query.addBindValue(description)
-        if not query.exec_():
-            error = query.lastError().text()
+        # Get the next available id
+        query = QSqlQuery("SELECT MAX(id) FROM expenses")
+        max_id = 0
+        if query.next() and query.value(0) is not None:
+            max_id = query.value(0)
+
+        new_id = max_id + 1
+
+        insert_query = QSqlQuery()
+        insert_query.prepare("""
+                              INSERT INTO expenses (id, date, category, amount, currency, description)
+                              VALUES (?, ?, ?, ?, ?, ?)
+                              """)
+        insert_query.addBindValue(new_id)
+        insert_query.addBindValue(date)
+        insert_query.addBindValue(category)
+        insert_query.addBindValue(amount)
+        insert_query.addBindValue(currency)
+        insert_query.addBindValue(description)
+        if not insert_query.exec_():
+            error = insert_query.lastError().text()
             QMessageBox.critical(self, "Database Error", error)
             return
 
@@ -374,10 +383,10 @@ class ExpenseApp(QWidget):
         # Get the selected row's ID
         selected_id = int(self.table.item(selected_row, 0).text())
 
-        # Shift all the rows below and including the selected row
+        # Shift all the rows with id >= selected_id + 1
         shift_query = QSqlQuery()
-        shift_query.prepare("UPDATE expenses SET id = id + 1 WHERE id > ?")
-        shift_query.addBindValue(selected_id)
+        shift_query.prepare("UPDATE expenses SET id = id + 1 WHERE id >= ?")
+        shift_query.addBindValue(selected_id + 1)
         if not shift_query.exec_():
             error = shift_query.lastError().text()
             QMessageBox.critical(self, "Database Error", error)
