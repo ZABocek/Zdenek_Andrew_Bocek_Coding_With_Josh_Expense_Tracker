@@ -100,7 +100,7 @@ class ExpenseApp(QWidget):
 
                 # Separate integer and decimal parts
                 if '.' in text_without_commas:
-                    integer_part, decimal_part = text_without_commas.split('.')
+                    integer_part, decimal_part = text_without_commas.split('.', 1)  # Use maxsplit=1
                 else:
                     integer_part = text_without_commas
                     decimal_part = ''
@@ -112,10 +112,14 @@ class ExpenseApp(QWidget):
                     integer_part_with_commas = ''
 
                 # Reconstruct the formatted text
-                if decimal_part:
+                if decimal_part != '':
                     formatted_text = integer_part_with_commas + '.' + decimal_part
                 else:
-                    formatted_text = integer_part_with_commas
+                    # Check if user typed a decimal point at the end
+                    if '.' in text_without_commas and text_without_commas.endswith('.'):
+                        formatted_text = integer_part_with_commas + '.'
+                    else:
+                        formatted_text = integer_part_with_commas
 
                 if negative:
                     formatted_text = '-' + formatted_text
@@ -136,7 +140,7 @@ class ExpenseApp(QWidget):
                 self.amount.setCursorPosition(new_cursor_pos)
                 self.amount.blockSignals(False)
             except ValueError:
-                # If input is not a valid integer, do not format
+                # If input is not a valid number, do not format
                 pass
         else:
             self.amount.blockSignals(True)
