@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QTableWidgetItem, QMessageBox
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 from PyQt5.QtCore import QDate
 import sys
+import re
 
 class ExpenseApp(QWidget):
     def __init__(self):
@@ -20,6 +21,8 @@ class ExpenseApp(QWidget):
         self.add_button.clicked.connect(self.add_expense)
         self.insert_button.clicked.connect(self.insert_expense)
         self.delete_button.clicked.connect(self.delete_expense)
+        
+        self.amount.textChanged.connect(self.format_amount)  # Connect the signal to the custom slot
         
         self.table = QTableWidget()
         self.table.setColumnCount(5) # ID, date, category, amount, description
@@ -46,7 +49,7 @@ class ExpenseApp(QWidget):
                                        "Disney+", "ChatGPT", "App Deploying Service", "Payment for AI", "Disney+ Package", 
                                        "Hulu", "ESPN", "Adobe Scan", "Duolingo", "Tinder", "New York Times Cooking", 
                                        "Adobe Acrobat Reader: Edit PDF"]))
-
+        
         self.master_layout = QVBoxLayout()
         self.row1 = QHBoxLayout()
         self.row2 = QHBoxLayout()
@@ -75,7 +78,19 @@ class ExpenseApp(QWidget):
         self.setLayout(self.master_layout)
         
         self.load_table()
-        
+
+    def format_amount(self):
+        """Format the amount with commas as user types."""
+        text = self.amount.text().replace(",", "")  # Remove commas to work with the raw number
+        if text:  # If there's any input
+            try:
+                formatted_text = "{:,.2f}".format(float(text))
+                self.amount.blockSignals(True)  # Temporarily block signals to avoid recursion
+                self.amount.setText(formatted_text)
+                self.amount.blockSignals(False)  # Unblock signals after setting formatted text
+            except ValueError:
+                pass  # Ignore errors for non-numeric input
+
     def load_table(self):
         self.table.setRowCount(0)
         
@@ -101,7 +116,7 @@ class ExpenseApp(QWidget):
     def add_expense(self):
         date = self.date_box.date().toString("dd-MM-yyyy")
         category = self.dropdown.currentText()
-        amount = self.amount.text()
+        amount = self.amount.text().replace(",", "")  # Remove commas before storing the value
         description = self.description.text()
         
         query = QSqlQuery()
@@ -140,7 +155,7 @@ class ExpenseApp(QWidget):
         # Insert new expense at the next ID
         date = self.date_box.date().toString("dd-MM-yyyy")
         category = self.dropdown.currentText()
-        amount = self.amount.text()
+        amount = self.amount.text().replace(",", "")  # Remove commas before storing the value
         description = self.description.text()
         
         insert_query = QSqlQuery()
