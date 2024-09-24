@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QTableWidgetItem, QMessageBox, QLabel, QLineEdit, QComboBox, QPushButton, QDateEdit, QTableWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
-from PyQt5.QtCore import QDate
+from PyQt5.QtCore import QDate, QRegularExpression
+from PyQt5.QtGui import QRegularExpressionValidator
 import sys
 import re
 
@@ -23,6 +24,11 @@ class ExpenseApp(QWidget):
         self.delete_button.clicked.connect(self.delete_expense)
         
         self.amount.textChanged.connect(self.format_amount)  # Connect the signal to the custom slot
+
+        # Apply a validator to the amount field to prevent invalid characters
+        reg_ex = QRegularExpression('^-?[0-9,]*\\.?[0-9]*$')
+        validator = QRegularExpressionValidator(reg_ex, self.amount)
+        self.amount.setValidator(validator)
         
         self.table = QTableWidget()
         self.table.setColumnCount(5) # ID, date, category, amount, description
@@ -161,10 +167,12 @@ class ExpenseApp(QWidget):
             
             self.table.insertRow(row)
             
+            # Format the amount with commas when displaying in the table
+            formatted_amount = "{:,.2f}".format(amount)
             self.table.setItem(row, 0, QTableWidgetItem(str(expense_id)))
             self.table.setItem(row, 1, QTableWidgetItem(date))
             self.table.setItem(row, 2, QTableWidgetItem(category))
-            self.table.setItem(row, 3, QTableWidgetItem(str(amount)))
+            self.table.setItem(row, 3, QTableWidgetItem(formatted_amount))
             self.table.setItem(row, 4, QTableWidgetItem(description))
 
             row += 1
