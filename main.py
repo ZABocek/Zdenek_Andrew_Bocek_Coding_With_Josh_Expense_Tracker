@@ -342,13 +342,10 @@ class ExpenseApp(QWidget):
             QMessageBox.warning(self, "Invalid Input", "Please enter a valid amount.")
             return
 
-        # Get the next available id
-        query = QSqlQuery("SELECT MAX(id) FROM expenses")
-        max_id = 0
-        if query.next() and query.value(0) is not None:
-            max_id = query.value(0)
-            if isinstance(max_id, str):
-                max_id = int(max_id)
+        # Get the next available id using COALESCE to handle empty tables
+        query = QSqlQuery("SELECT COALESCE(MAX(id), 0) FROM expenses")
+        if query.next():
+            max_id = int(query.value(0))
         else:
             max_id = 0
 
@@ -356,9 +353,9 @@ class ExpenseApp(QWidget):
 
         insert_query = QSqlQuery()
         insert_query.prepare("""
-                              INSERT INTO expenses (id, date, category, amount, currency, description)
-                              VALUES (?, ?, ?, ?, ?, ?)
-                              """)
+                          INSERT INTO expenses (id, date, category, amount, currency, description)
+                          VALUES (?, ?, ?, ?, ?, ?)
+                          """)
         insert_query.addBindValue(new_id)
         insert_query.addBindValue(date)
         insert_query.addBindValue(category)
