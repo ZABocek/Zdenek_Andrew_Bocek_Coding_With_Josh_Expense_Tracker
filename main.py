@@ -46,6 +46,17 @@ class ExpenseApp(QWidget):
             'CNY': {'symbol': '¥', 'decimal_sep': '.', 'thousand_sep': ','},
             'SEK': {'symbol': 'kr', 'decimal_sep': ',', 'thousand_sep': ' '},
             'NZD': {'symbol': '$', 'decimal_sep': '.', 'thousand_sep': ','},
+            'CZK': {'symbol': 'Kč', 'decimal_sep': ',', 'thousand_sep': ' '},
+            'PLN': {'symbol': 'zł', 'decimal_sep': ',', 'thousand_sep': ' '},
+            'HUF': {'symbol': 'Ft', 'decimal_sep': ',', 'thousand_sep': ' '},
+            'DKK': {'symbol': 'kr', 'decimal_sep': ',', 'thousand_sep': '.'},
+            'NOK': {'symbol': 'kr', 'decimal_sep': ',', 'thousand_sep': ' '},
+            'RUB': {'symbol': '₽', 'decimal_sep': ',', 'thousand_sep': ' '},
+            'TRY': {'symbol': '₺', 'decimal_sep': ',', 'thousand_sep': '.'},
+            'ISK': {'symbol': 'kr', 'decimal_sep': '.', 'thousand_sep': ','},
+            'RON': {'symbol': 'lei', 'decimal_sep': ',', 'thousand_sep': '.'},
+            'HRK': {'symbol': 'kn', 'decimal_sep': ',', 'thousand_sep': '.'},
+            'SKK': {'symbol': 'Sk', 'decimal_sep': ',', 'thousand_sep': ' '},  # Slovak Koruna (historic)
             # Add more currencies as needed
         }
 
@@ -88,8 +99,8 @@ class ExpenseApp(QWidget):
         self.insert_button.setFont(comic_font)
         self.delete_button.setFont(comic_font)
 
-        # Populate currency dropdown with top currencies
-        self.currency_dropdown.addItems(self.currency_data.keys())
+        # Populate currency dropdown with currencies
+        self.currency_dropdown.addItems(sorted(self.currency_data.keys()))
 
         self.amount.textChanged.connect(self.format_amount)
         self.currency_dropdown.currentIndexChanged.connect(self.update_currency_formatting)
