@@ -26,13 +26,13 @@ class ExpenseApp(QWidget):
 
         # Set cursive font for table contents
         if system_platform == 'Windows':
-            cursive_font_name = "Segoe Script"
+            self.cursive_font_name = "Segoe Script"
         elif system_platform == 'Darwin':  # Mac OS
-            cursive_font_name = "Apple Chancery"
+            self.cursive_font_name = "Apple Chancery"
         else:
-            cursive_font_name = "Comic Sans MS"  # As a fallback
+            self.cursive_font_name = "Comic Sans MS"  # As a fallback
 
-        cursive_font = QFont(cursive_font_name, 10)
+        self.cursive_font = QFont(self.cursive_font_name, 10)
 
         self.date_box = QDateEdit()
         self.dropdown = QComboBox()
@@ -78,7 +78,7 @@ class ExpenseApp(QWidget):
         self.table = QTableWidget()
         self.table.setColumnCount(5)  # ID, date, category, amount, description
         self.table.setHorizontalHeaderLabels(["Id", "Date", "Category", "Amount", "Description"])
-        self.table.setFont(cursive_font)  # Set cursive font for table
+        self.table.setFont(self.cursive_font)  # Set cursive font for table
 
         self.dropdown.addItems(sorted([
             "Rent", "Utilities", "House Payment", "Internet", "Savings (Acorn)", "Savings Account",
@@ -224,12 +224,12 @@ class ExpenseApp(QWidget):
             item_amount = QTableWidgetItem(formatted_amount)
             item_description = QTableWidgetItem(description)
 
-            # Set cursive font to table items
-            item_id.setFont(QFont(cursive_font_name, 10))
-            item_date.setFont(QFont(cursive_font_name, 10))
-            item_category.setFont(QFont(cursive_font_name, 10))
-            item_amount.setFont(QFont(cursive_font_name, 10))
-            item_description.setFont(QFont(cursive_font_name, 10))
+            # Set cursive font to table items using self.cursive_font
+            item_id.setFont(self.cursive_font)
+            item_date.setFont(self.cursive_font)
+            item_category.setFont(self.cursive_font)
+            item_amount.setFont(self.cursive_font)
+            item_description.setFont(self.cursive_font)
 
             self.table.setItem(row, 0, item_id)
             self.table.setItem(row, 1, item_date)
