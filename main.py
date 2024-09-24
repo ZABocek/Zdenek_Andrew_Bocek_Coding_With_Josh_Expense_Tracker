@@ -352,7 +352,10 @@ class ExpenseApp(QWidget):
         query.addBindValue(amount)
         query.addBindValue(currency)
         query.addBindValue(description)
-        query.exec_()
+        if not query.exec_():
+            error = query.lastError().text()
+            QMessageBox.critical(self, "Database Error", error)
+            return
 
         self.date_box.setDate(QDate.currentDate())
         self.dropdown.setCurrentIndex(0)
@@ -375,7 +378,10 @@ class ExpenseApp(QWidget):
         shift_query = QSqlQuery()
         shift_query.prepare("UPDATE expenses SET id = id + 1 WHERE id > ?")
         shift_query.addBindValue(selected_id)
-        shift_query.exec_()
+        if not shift_query.exec_():
+            error = shift_query.lastError().text()
+            QMessageBox.critical(self, "Database Error", error)
+            return
 
         # Insert new expense at the next ID
         date = self.date_box.date().toString("dd-MM-yyyy")
@@ -408,7 +414,10 @@ class ExpenseApp(QWidget):
         insert_query.addBindValue(amount)
         insert_query.addBindValue(currency)
         insert_query.addBindValue(description)
-        insert_query.exec_()
+        if not insert_query.exec_():
+            error = insert_query.lastError().text()
+            QMessageBox.critical(self, "Database Error", error)
+            return
 
         self.date_box.setDate(QDate.currentDate())
         self.dropdown.setCurrentIndex(0)
@@ -434,13 +443,19 @@ class ExpenseApp(QWidget):
         query = QSqlQuery()
         query.prepare("DELETE FROM expenses WHERE id = ?")
         query.addBindValue(expense_id)
-        query.exec_()
+        if not query.exec_():
+            error = query.lastError().text()
+            QMessageBox.critical(self, "Database Error", error)
+            return
 
         # Reorder the remaining IDs after deletion
         reorder_query = QSqlQuery()
         reorder_query.prepare("UPDATE expenses SET id = id - 1 WHERE id > ?")
         reorder_query.addBindValue(expense_id)
-        reorder_query.exec_()
+        if not reorder_query.exec_():
+            error = reorder_query.lastError().text()
+            QMessageBox.critical(self, "Database Error", error)
+            return
 
         self.load_table()
 
