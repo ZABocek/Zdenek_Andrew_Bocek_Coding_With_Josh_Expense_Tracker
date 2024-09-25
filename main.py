@@ -52,9 +52,6 @@ class ExpenseApp(QWidget):
                 width: 20px;
                 border-left: 1px solid #cccccc; /* Optional: Add a separator */
             }
-            QComboBox::down-arrow {
-                image: none; /* Use default arrow */
-            }
             QTableWidget {
                 background-color: #ffffff; /* White background */
                 color: #000000; /* Black text */
