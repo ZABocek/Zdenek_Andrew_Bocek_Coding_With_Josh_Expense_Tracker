@@ -15,8 +15,51 @@ class ExpenseApp(QWidget):
         self.resize(600, 600)
         self.setWindowTitle("Expense Tracker 2.0")
 
-        # Set background color
-        self.setStyleSheet("background-color: #f0f8ff;")  # Light blue color
+        # Set Professional colors and background colors for different widgets
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #f7f7f7; /* Light gray background */
+            }
+            QLabel {
+                color: #2e2e2e; /* Dark gray text */
+                font-size: 10pt;
+            }
+            QLineEdit, QComboBox, QDateEdit {
+                background-color: #ffffff; /* White background */
+                color: #000000; /* Black text */
+                border: 1px solid #cccccc; /* Light gray border */
+                border-radius: 4px;
+                padding: 4px;
+            }
+            QLineEdit:focus, QComboBox:focus, QDateEdit:focus {
+                border: 1px solid #5b9bd5; /* Soft blue border on focus */
+            }
+            QTableWidget {
+                background-color: #ffffff; /* White background */
+                color: #000000; /* Black text */
+                gridline-color: #dcdcdc; /* Light gray grid lines */
+            }
+            QHeaderView::section {
+                background-color: #e2e2e2; /* Light gray header */
+                color: #000000; /* Black text */
+                padding: 4px;
+                border: none;
+                font-weight: bold;
+            }
+            QPushButton {
+                background-color: #5b9bd5; /* Soft blue background */
+                color: #ffffff; /* White text */
+                border: none;
+                border-radius: 4px;
+                padding: 6px 12px;
+            }
+            QPushButton:hover {
+                background-color: #4a86c5; /* Slightly darker blue on hover */
+            }
+            QPushButton:pressed {
+                background-color: #3c78b5; /* Even darker blue when pressed */
+            }
+        """)  
 
         # Determine the operating system
         system_platform = platform.system()
