@@ -40,6 +40,7 @@ class ExpenseApp(QWidget):
                 border: 1px solid #cccccc;
                 border-radius: 4px;
                 padding-left: 4px;
+                padding-right: 25px; /* Leave space for the arrow */
                 min-width: 80px; /* Ensure enough width */
             }
             QComboBox:focus {
@@ -48,10 +49,14 @@ class ExpenseApp(QWidget):
             QComboBox::drop-down {
                 subcontrol-origin: padding;
                 subcontrol-position: top right;
-                width: 20px;
+                width: 20px; /* Adjusted width to accommodate arrow */
                 border-left: 1px solid #cccccc; /* Optional: Add a separator */
             }
-            /* Removed QComboBox::down-arrow rule to use the default arrow */
+            QComboBox::down-arrow {
+                image: url(down_arrow.png); /* Use a custom arrow image */
+                width: 10px;
+                height: 10px;
+            }
             QTableWidget {
                 background-color: #ffffff; /* White background */
                 color: #000000; /* Black text */
