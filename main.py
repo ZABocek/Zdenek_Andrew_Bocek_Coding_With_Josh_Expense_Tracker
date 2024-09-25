@@ -38,7 +38,6 @@ class ExpenseApp(QWidget):
                 background-color: #ffffff;
                 color: #000000;
                 border: 1px solid #cccccc;
-                border-radius: 4px;
                 padding-left: 4px;
                 padding-right: 25px; /* Leave space for the arrow */
                 min-width: 80px; /* Ensure enough width */
@@ -51,8 +50,6 @@ class ExpenseApp(QWidget):
                 subcontrol-position: top right;
                 width: 20px; /* Adjusted width to accommodate arrow */
                 border-left: 1px solid #cccccc; /* Optional: Add a separator */
-                border-top-right-radius: 4px; /* Match the combo box border radius */
-                border-bottom-right-radius: 4px;
             }
             QComboBox::down-arrow {
                 image: none; /* Use default arrow */
