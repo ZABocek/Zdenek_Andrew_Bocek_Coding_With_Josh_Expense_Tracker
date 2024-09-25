@@ -573,14 +573,7 @@ if not database.open():
 
 # Adjust the table schema
 query = QSqlQuery()
-query.exec_("""CREATE TABLE IF NOT EXISTS expenses (
-    id INTEGER PRIMARY KEY,
-    date TEXT,
-    category TEXT,
-    amount REAL,
-    currency TEXT,
-    description TEXT
-)""")
+query.exec_("CREATE TABLE IF NOT EXISTS expenses (id INTEGER PRIMARY KEY, date TEXT, category TEXT, amount REAL, currency TEXT, description TEXT)")
 
 if __name__ == "__main__":
     app = QApplication([])
