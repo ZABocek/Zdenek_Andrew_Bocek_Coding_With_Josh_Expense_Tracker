@@ -40,22 +40,16 @@ class ExpenseApp(QWidget):
                 border: 1px solid #cccccc;
                 padding-left: 4px;
                 padding-right: 25px; /* Leave space for the arrow */
-                min-width: 80px; /* Ensure enough width */
+                min-width: 100px; /* Increased minimum width */
             }
             QComboBox:focus {
                 border: 1px solid #5b9bd5; /* Soft blue border on focus */
             }
             QComboBox::drop-down {
-                subcontrol-origin: border; /* Position relative to border */
+                subcontrol-origin: padding; /* Position relative to padding */
                 subcontrol-position: top right;
                 width: 20px; /* Adjusted width to accommodate arrow */
                 border-left: 1px solid #cccccc; /* Optional: Add a separator */
-            }
-            QComboBox::down-arrow {
-                image: none; /* Use default arrow */
-                margin: 0px; /* Reset margin */
-                width: 10px;
-                height: 10px;
             }
             QTableWidget {
                 background-color: #ffffff; /* White background */
