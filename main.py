@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QTableWidgetItem, QMessageBox, QLabel, QLineEdit, QHeaderView, 
-    QComboBox, QPushButton, QDateEdit, QTableWidget, QVBoxLayout, QHBoxLayout
+    QApplication, QWidget, QTableWidgetItem, QMessageBox, QLabel, QLineEdit, QHeaderView,
+    QComboBox, QPushButton, QDateEdit, QTableWidget, QVBoxLayout, QHBoxLayout, QSizePolicy
 )
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 from PyQt5.QtCore import QDate, QRegularExpression, Qt
@@ -12,7 +12,7 @@ import platform
 class ExpenseApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.resize(600, 600)
+        self.resize(800, 600)  # Increased window width
         self.setWindowTitle("Expense Tracker 2.0")
 
         # Set Professional colors and background colors for different widgets
@@ -40,7 +40,7 @@ class ExpenseApp(QWidget):
                 border: 1px solid #cccccc;
                 padding-left: 4px;
                 padding-right: 25px; /* Leave space for the arrow */
-                min-width: 100px; /* Increased minimum width */
+                min-width: 80px; /* Ensure enough width */
             }
             QComboBox:focus {
                 border: 1px solid #5b9bd5; /* Soft blue border on focus */
@@ -76,7 +76,7 @@ class ExpenseApp(QWidget):
             QPushButton:pressed {
                 background-color: #3c78b5; /* Even darker blue when pressed */
             }
-        """)   
+        """)
 
         # Determine the operating system
         system_platform = platform.system()
@@ -163,6 +163,26 @@ class ExpenseApp(QWidget):
         # Populate currency dropdown with currencies
         self.currency_dropdown.addItems(sorted(self.currency_data.keys()))
 
+        # Set size policies
+        self.date_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.date_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+        self.category_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.dropdown.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        self.amount_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.amount.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        self.currency_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.currency_dropdown.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+        self.description_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.description.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        # Set minimum widths if necessary
+        self.dropdown.setMinimumWidth(150)
+        self.currency_dropdown.setMinimumWidth(80)
+
         self.amount.textChanged.connect(self.format_amount)
         self.currency_dropdown.currentIndexChanged.connect(self.update_currency_formatting)
 
@@ -206,19 +226,23 @@ class ExpenseApp(QWidget):
         self.row2b = QHBoxLayout()
         self.row3 = QHBoxLayout()
 
+        # Add widgets to row1 with stretch factors
         self.row1.addWidget(self.date_label)
         self.row1.addWidget(self.date_box)
         self.row1.addWidget(self.category_label)
-        self.row1.addWidget(self.dropdown)
+        self.row1.addWidget(self.dropdown, stretch=1)  # Allow dropdown to expand
 
+        # Add widgets to row2a with stretch factors
         self.row2a.addWidget(self.amount_label)
         self.row2a.addWidget(self.amount)
         self.row2a.addWidget(self.currency_label)
         self.row2a.addWidget(self.currency_dropdown)
 
+        # Add widgets to row2b with stretch factors
         self.row2b.addWidget(self.description_label)
-        self.row2b.addWidget(self.description)
+        self.row2b.addWidget(self.description, stretch=1)  # Allow description to expand
 
+        # Add buttons to row3
         self.row3.addWidget(self.add_button)
         self.row3.addWidget(self.insert_button)
         self.row3.addWidget(self.delete_button)
