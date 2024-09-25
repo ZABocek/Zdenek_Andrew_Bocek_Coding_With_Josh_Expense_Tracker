@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QTableWidgetItem, QMessageBox, QLabel, QLineEdit,
+    QApplication, QWidget, QTableWidgetItem, QMessageBox, QLabel, QLineEdit, QHeaderView, 
     QComboBox, QPushButton, QDateEdit, QTableWidget, QVBoxLayout, QHBoxLayout
 )
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
-from PyQt5.QtCore import QDate, QRegularExpression
+from PyQt5.QtCore import QDate, QRegularExpression, Qt
 from PyQt5.QtGui import QRegularExpressionValidator, QFont
 import sys
 import re
@@ -61,6 +61,7 @@ class ExpenseApp(QWidget):
         }
 
         self.date_box = QDateEdit()
+        self.date_box.setDate(QDate.currentDate())
         self.dropdown = QComboBox()
         self.amount = QLineEdit()
         self.description = QLineEdit()
@@ -111,6 +112,8 @@ class ExpenseApp(QWidget):
         self.table = QTableWidget()
         self.table.setColumnCount(6)  # ID, date, category, amount, currency, description
         self.table.setHorizontalHeaderLabels(["Id", "Date", "Category", "Amount", "Currency", "Description"])
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.sortByColumn(1, Qt.DescendingOrder)
         self.table.setFont(self.table_font)  # Set professional font for table
 
         self.dropdown.addItems(sorted([
