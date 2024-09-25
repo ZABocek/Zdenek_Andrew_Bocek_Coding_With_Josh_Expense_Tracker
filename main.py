@@ -113,7 +113,6 @@ class ExpenseApp(QWidget):
         self.table.setColumnCount(6)  # ID, date, category, amount, currency, description
         self.table.setHorizontalHeaderLabels(["Id", "Date", "Category", "Amount", "Currency", "Description"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.table.sortByColumn(1, Qt.DescendingOrder)
         self.table.setFont(self.table_font)  # Set professional font for table
 
         self.dropdown.addItems(sorted([
@@ -276,7 +275,7 @@ class ExpenseApp(QWidget):
     def load_table(self):
         self.table.setRowCount(0)
 
-        query = QSqlQuery("SELECT * FROM expenses ORDER BY id ASC")
+        query = QSqlQuery("SELECT * FROM expenses ORDER BY id DESC")
         row = 0
         while query.next():
             expense_id = query.value(0)
@@ -355,10 +354,7 @@ class ExpenseApp(QWidget):
         new_id = max_id + 1
 
         insert_query = QSqlQuery()
-        insert_query.prepare("""
-                          INSERT INTO expenses (id, date, category, amount, currency, description)
-                          VALUES (?, ?, ?, ?, ?, ?)
-                          """)
+        insert_query.prepare("INSERT INTO expenses (id, date, category, amount, currency, description) VALUES (?, ?, ?, ?, ?, ?)")
         insert_query.addBindValue(new_id)
         insert_query.addBindValue(date)
         insert_query.addBindValue(category)
@@ -368,8 +364,10 @@ class ExpenseApp(QWidget):
         if not insert_query.exec_():
             error = insert_query.lastError().text()
             QMessageBox.critical(self, "Database Error", error)
+            print("Database Error in add_expense:", error)  # Optional: Print error to console
             return
 
+        # Reset input fields
         self.date_box.setDate(QDate.currentDate())
         self.dropdown.setCurrentIndex(0)
         self.currency_dropdown.setCurrentIndex(0)
@@ -394,6 +392,7 @@ class ExpenseApp(QWidget):
         if not shift_query.exec_():
             error = shift_query.lastError().text()
             QMessageBox.critical(self, "Database Error", error)
+            print("Database Error in shift_query:", error)  # Optional: Print error to console
             return
 
         # Insert new expense at the next ID
@@ -417,10 +416,7 @@ class ExpenseApp(QWidget):
             return
 
         insert_query = QSqlQuery()
-        insert_query.prepare("""
-                             INSERT INTO expenses (id, date, category, amount, currency, description)
-                             VALUES (?, ?, ?, ?, ?, ?)
-                             """)
+        insert_query.prepare("INSERT INTO expenses (id, date, category, amount, currency, description) VALUES (?, ?, ?, ?, ?, ?)")
         insert_query.addBindValue(selected_id + 1)
         insert_query.addBindValue(date)
         insert_query.addBindValue(category)
@@ -430,8 +426,10 @@ class ExpenseApp(QWidget):
         if not insert_query.exec_():
             error = insert_query.lastError().text()
             QMessageBox.critical(self, "Database Error", error)
+            print("Database Error in insert_expense:", error)  # Optional: Print error to console
             return
 
+        # Reset input fields
         self.date_box.setDate(QDate.currentDate())
         self.dropdown.setCurrentIndex(0)
         self.currency_dropdown.setCurrentIndex(0)
@@ -459,6 +457,7 @@ class ExpenseApp(QWidget):
         if not query.exec_():
             error = query.lastError().text()
             QMessageBox.critical(self, "Database Error", error)
+            print("Database Error in delete_expense:", error)  # Optional: Print error to console
             return
 
         # Reorder the remaining IDs after deletion
@@ -468,6 +467,7 @@ class ExpenseApp(QWidget):
         if not reorder_query.exec_():
             error = reorder_query.lastError().text()
             QMessageBox.critical(self, "Database Error", error)
+            print("Database Error in reorder_query:", error)  # Optional: Print error to console
             return
 
         self.load_table()
@@ -481,16 +481,14 @@ if not database.open():
 
 # Adjust the table schema
 query = QSqlQuery()
-query.exec_("""
-    CREATE TABLE IF NOT EXISTS expenses (
-        id INTEGER PRIMARY KEY,
-        date TEXT,
-        category TEXT,
-        amount REAL,
-        currency TEXT,
-        description TEXT
-    )
-""")
+query.exec_("""CREATE TABLE IF NOT EXISTS expenses (
+    id INTEGER PRIMARY KEY,
+    date TEXT,
+    category TEXT,
+    amount REAL,
+    currency TEXT,
+    description TEXT
+)""")
 
 if __name__ == "__main__":
     app = QApplication([])
