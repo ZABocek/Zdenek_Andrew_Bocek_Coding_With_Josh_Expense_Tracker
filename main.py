@@ -47,13 +47,16 @@ class ExpenseApp(QWidget):
                 border: 1px solid #5b9bd5; /* Soft blue border on focus */
             }
             QComboBox::drop-down {
-                subcontrol-origin: padding;
+                subcontrol-origin: border; /* Position relative to border */
                 subcontrol-position: top right;
                 width: 20px; /* Adjusted width to accommodate arrow */
                 border-left: 1px solid #cccccc; /* Optional: Add a separator */
+                border-top-right-radius: 4px; /* Match the combo box border radius */
+                border-bottom-right-radius: 4px;
             }
             QComboBox::down-arrow {
-                image: url(down_arrow.png); /* Use a custom arrow image */
+                image: none; /* Use default arrow */
+                margin: 0px; /* Reset margin */
                 width: 10px;
                 height: 10px;
             }
@@ -82,7 +85,7 @@ class ExpenseApp(QWidget):
             QPushButton:pressed {
                 background-color: #3c78b5; /* Even darker blue when pressed */
             }
-        """)  
+        """)   
 
         # Determine the operating system
         system_platform = platform.system()
