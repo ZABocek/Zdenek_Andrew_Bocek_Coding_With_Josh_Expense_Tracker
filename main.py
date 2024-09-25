@@ -24,15 +24,36 @@ class ExpenseApp(QWidget):
                 color: #2e2e2e; /* Dark gray text */
                 font-size: 10pt;
             }
-            QLineEdit, QComboBox, QDateEdit {
+            QLineEdit, QDateEdit {
                 background-color: #ffffff; /* White background */
                 color: #000000; /* Black text */
                 border: 1px solid #cccccc; /* Light gray border */
                 border-radius: 4px;
                 padding: 4px;
             }
-            QLineEdit:focus, QComboBox:focus, QDateEdit:focus {
+            QLineEdit:focus, QDateEdit:focus {
                 border: 1px solid #5b9bd5; /* Soft blue border on focus */
+            }
+            QComboBox {
+                background-color: #ffffff;
+                color: #000000;
+                border: 1px solid #cccccc;
+                border-radius: 4px;
+                padding-left: 4px;
+                padding-right: 25px; /* Leave space for the arrow */
+                min-width: 80px; /* Ensure enough width */
+            }
+            QComboBox:focus {
+                border: 1px solid #5b9bd5; /* Soft blue border on focus */
+            }
+            QComboBox::drop-down {
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 20px;
+                border-left: 1px solid #cccccc; /* Optional: Add a separator */
+            }
+            QComboBox::down-arrow {
+                image: none; /* Use default arrow */
             }
             QTableWidget {
                 background-color: #ffffff; /* White background */
